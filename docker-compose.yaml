@@ -1,0 +1,31 @@
+services:
+  frontend:
+    build:
+      context: conduit-frontend
+      dockerfile: frontend.Dockerfile
+    ports:
+      - 8282:80
+    restart: unless-stopped
+    networks:
+      - conduit-network
+
+  backend:
+    build:
+      context: conduit-backend
+      dockerfile: backend.Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - conduit:/app/db_data
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    networks:
+      - conduit-network
+
+volumes:
+  conduit:
+
+networks:
+  conduit-network:
+    driver: bridge
