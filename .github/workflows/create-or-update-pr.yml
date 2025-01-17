@@ -16,16 +16,19 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
+          ref: dev
           submodules: recursive
+          fetch-depth: 0
 
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          committer: PascalNehlsen <pascaldev92@gmail.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           base: main
-          branch: create-pr/${{ github.run_id }}
+          branch: create-pr
           delete-branch: true
           labels: |
             automated pr
