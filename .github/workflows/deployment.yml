@@ -20,34 +20,43 @@ jobs:
       - name: Init submodules
         run: git submodule update --init --recursive
 
-      - name: Deploy to VM and build
-        uses: easingthemes/ssh-deploy@v5.1.0
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@v0.1.7
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SOURCE: '.'
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          ARGS: '--rsync-path="sudo rsync" -rlgoDzvc --ignore-existing -i'
-          TARGET: ${{ secrets.PATH }}
-          EXCLUDE: 'conduit-frontend/dist/, conduit-backend/node_modules/'
-          SCRIPT_BEFORE: |
-            whoami
-            ls -al ${{ secrets.PATH }}
-          SCRIPT_AFTER: |
-            whoami
-            echo "Starting Docker Compose..."
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: 'tests/a.txt,tests/b.txt'
+          target: ${{ secrets.PATH }}
 
-            cd ${{ secrets.PATH }}
+      # - name: Deploy to VM and build
+      #   uses: easingthemes/ssh-deploy@v5.1.0
+      #   with:
+      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     SOURCE: '.'
+      #     REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+      #     REMOTE_USER: ${{ secrets.REMOTE_USER }}
+      #     ARGS: '--rsync-path="sudo rsync" -rlgoDzvc --ignore-existing -i'
+      #     TARGET: ${{ secrets.PATH }}
+      #     EXCLUDE: 'conduit-frontend/dist/, conduit-backend/node_modules/'
+      #     SCRIPT_BEFORE: |
+      #       whoami
+      #       ls -al ${{ secrets.PATH }}
+      #     SCRIPT_AFTER: |
+      #       whoami
+      #       echo "Starting Docker Compose..."
 
-            echo "Stopping existing Docker containers..."
-            docker compose down --rmi all --remove-orphans
+      #       cd ${{ secrets.PATH }}
 
-            if ! docker compose up -d; then
-              echo "Docker Compose failed to start."
-              exit 1
-            fi
-            echo "Docker Compose started successfully."
+      #       echo "Stopping existing Docker containers..."
+      #       docker compose down --rmi all --remove-orphans
 
-            docker ps -a
-            echo "Health check and logs:"
-            docker logs $(docker ps -q) || true
+      #       if ! docker compose up -d; then
+      #         echo "Docker Compose failed to start."
+      #         exit 1
+      #       fi
+      #       echo "Docker Compose started successfully."
+
+      #       docker ps -a
+      #       echo "Health check and logs:"
+      #       docker logs $(docker ps -q) || true
