@@ -1,0 +1,53 @@
+name: Clone repo & build & start app with rsync
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          submodules: 'recursive'
+
+      - name: Copy example.env file to .env
+        run: cp example.env .env
+
+      - name: Init submodules
+        run: git submodule update --init --recursive
+
+      - name: Deploy to VM and build
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.KEY }}
+          SOURCE: '.'
+          REMOTE_HOST: ${{ secrets.HOST }}
+          REMOTE_USER: ${{ secrets.USER }}
+          ARGS: '--rsync-path="sudo rsync" -rlgoDzvc --ignore-existing -i'
+          TARGET: ${{ secrets.PATH }}
+          EXCLUDE: 'conduit-frontend/dist/, conduit-backend/node_modules/'
+          SCRIPT_BEFORE: |
+            whoami
+            ls -al ${{ secrets.PATH }}
+          SCRIPT_AFTER: |
+            whoami
+            echo "Starting Docker Compose..."
+
+            cd ${{ secrets.PATH }}
+
+            echo "Stopping existing Docker containers..."
+            docker compose down --rmi all --remove-orphans
+
+            if ! docker compose up -d; then
+              echo "Docker Compose failed to start."
+              exit 1
+            fi
+            echo "Docker Compose started successfully."
+
+            docker ps -a
+            echo "Health check and logs:"
+            docker logs $(docker ps -q) || true
