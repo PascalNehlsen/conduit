@@ -23,6 +23,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          committer: PascalNehlsen <pascaldev92@gmail.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           base: main
           branch: create-pr/${{ github.run_id }}
