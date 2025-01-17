@@ -1,0 +1,51 @@
+name: Create PR from dev to main
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          base: main
+          branch: create-pr/${{ github.run_id }}
+          delete-branch: true
+          labels: |
+            automated pr
+
+      - name: Run Frontend Tests
+        id: frontend-tests
+        run: |
+          cd conduit-frontend
+          echo "Running frontend tests..."
+
+      - name: Run Backend Tests
+        id: backend-tests
+        run: |
+          cd conduit-backend
+          echo "Running backend tests..."
+
+      - name: Enable Pull Request Automerge
+        if: steps.frontend-tests.outcome == 'success' && steps.backend-tests.outcome == 'success' && steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
