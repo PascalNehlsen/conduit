@@ -2,6 +2,9 @@ name: Create PR from dev to main
 
 on:
   workflow_call:
+    secrets:
+      token:
+        required: true
   workflow_dispatch:
 
 permissions:
@@ -28,6 +31,7 @@ jobs:
           committer: PascalNehlsen <pascaldev92@gmail.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           branch: create-pr
+          base: main
           delete-branch: true
           labels: |
             automated pr

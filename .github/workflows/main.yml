@@ -8,11 +8,12 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
 
 jobs:
   create-or-update-pr:
     uses: ./.github/workflows/create-or-update-pr.yml
+    secrets:
+      token: ${{ secrets.PAT }}
 
   clone-repo-with-rsync:
     uses: ./.github/workflows/deployment.yml
