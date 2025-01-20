@@ -5,10 +5,6 @@ on:
     branches:
       - dev
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   create-or-update-pr:
     uses: ./.github/workflows/create-or-update-pr.yml
@@ -18,3 +14,8 @@ jobs:
   clone-repo-with-rsync:
     uses: ./.github/workflows/deployment.yml
     needs: create-or-update-pr
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+      REMOTE_USER: ${{ secrets.REMOTE_USER }}
+      TARGET: ${{ secrets.PATH }}
