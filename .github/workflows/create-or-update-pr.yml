@@ -25,9 +25,10 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: false
-          branch: example-patches
+          branch: create-pr
+          base: main
           delete-branch: true
-          title: '[Example] Update report'
+          title: 'ci: created auto pr to main'
           body: |
             Update report
             - Updated with *today's* date
