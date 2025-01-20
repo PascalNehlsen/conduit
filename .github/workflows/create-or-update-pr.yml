@@ -25,9 +25,9 @@ jobs:
           token: ${{ secrets.PAT }}
           committer: PascalNehlsen <pascaldev92@gmail.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-          branch: create-pr/${{ github.run_id }}
+          branch: dev
           base: main
-          delete-branch: true
+          delete-branch: false
           labels: |
             automated pr
 
