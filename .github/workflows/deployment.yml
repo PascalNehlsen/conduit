@@ -47,6 +47,8 @@ jobs:
             whoami
             echo "Starting Docker Compose..."
 
+            cd ${{ secrets.TARGET }}
+
             echo "Stopping existing Docker containers..."
             docker compose down --rmi all --remove-orphans
 
