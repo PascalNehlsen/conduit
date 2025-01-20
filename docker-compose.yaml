@@ -16,7 +16,7 @@ services:
     env_file:
       - .env
     volumes:
-      - conduit:/app/db_data
+      - conduit-backend:/app/db_data
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -24,7 +24,7 @@ services:
       - conduit-network
 
 volumes:
-  conduit:
+  conduit-backend:
 
 networks:
   conduit-network:

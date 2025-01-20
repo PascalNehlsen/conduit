@@ -57,7 +57,3 @@ jobs:
               exit 1
             fi
             echo "Docker Compose started successfully."
-
-            docker ps -a
-            echo "Health check and logs:"
-            docker logs $(docker ps -q) || true
