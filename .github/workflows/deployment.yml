@@ -88,11 +88,11 @@ jobs:
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
 
-      - name: Push images (with Docker Content Trust)
-        run: |
-          echo "Pushing frontend and backend images with Docker Content Trust enabled."
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
+      # - name: Push images (with Docker Content Trust)
+      #   run: |
+      #     echo "Pushing frontend and backend images with Docker Content Trust enabled."
+      #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
+      #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -100,8 +100,8 @@ jobs:
     steps:
       - name: Set up SSH key
         run: |
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
 
       - name: SSH into the server and deploy with Docker Compose
