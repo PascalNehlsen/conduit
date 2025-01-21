@@ -112,15 +112,16 @@ jobs:
 
       - name: SSH into the server and deploy with Docker Compose
         run: |
-          # Ensure the target directory exists on the remote server
+          # Ensure the target directory exists on the remote server with correct permissions
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-            mkdir -p ${{ secrets.TARGET }}
+            sudo mkdir -p ${{ secrets.TARGET }}
+            sudo chown -R ${{ secrets.REMOTE_USER }}:$${{ secrets.REMOTE_USER }} ${{ secrets.TARGET }}  # Ensure user has write permission
           EOF
 
-          # Copy docker-compose.yaml to the remote server
-          rsync -avz ./docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
+          # Use rsync to transfer docker-compose.yml with sudo permissions
+          rsync -avz --rsync-path="sudo rsync" ./docker-compose.yml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
-          # Run Docker Compose commands on the remote server
+          # Deploy the app with Docker Compose
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             cd ${{ secrets.TARGET }}
             echo "Starting the deployment..."
