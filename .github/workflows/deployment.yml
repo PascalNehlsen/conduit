@@ -64,28 +64,26 @@ jobs:
         uses: docker/build-push-action@v6.12.0
         with:
           context: ./conduit-frontend
+          file: ./conduit-frontend/frontend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
-          build-args: |
-            DOCKERFILE=./conduit-frontend/frontend.Dockerfile
-            
+
       - name: Build and push Docker image for backend
         id: backend-build-and-push
         uses: docker/build-push-action@v6.12.0
         with:
           context: ./conduit-backend
+          file: ./conduit-frontend/backend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
-          build-args: |
-            DOCKERFILE=./conduit-frontend/backend.Dockerfile
             
       - name: Push images (with Docker Content Trust)
         run: |
