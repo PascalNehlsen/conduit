@@ -17,7 +17,7 @@ on:
       - main
 
 env:
-  REGISTRY: ghcr.io/PascalNehlsen
+  REGISTRY: ghcr.io/pascalnehlsen
   IMAGE_NAME: conduit
   IMAGE_TAG: ${{ github.sha }}
   DOCKER_BUILDKIT: 1
