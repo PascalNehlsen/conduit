@@ -22,10 +22,6 @@ env:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_CONTENT_TRUST: 1
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  REMOTE_USER: ${{ secrets.REMOTE_USER }}
-  REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-  REMOTE_PATH: ${{ secrets.TARGET }}
 
 permissions:
   contents: read
@@ -102,18 +98,18 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
       - name: SSH into the server and deploy with Docker Compose
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            mkdir -p ${{ secrets.TARGET }}
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+            sudo mkdir -p ${{ secrets.TARGET }}
           EOF
 
-          rsync -avz ./docker-compose.yml $REMOTE_USER@$REMOTE_HOST:${{ secrets.TARGET }}/
+          rsync -avz ./docker-compose.yml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 $REMOTE_USER@$REMOTE_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             cd ${{ secrets.TARGET }}
             echo "Starting the deployment..."
             docker-compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
