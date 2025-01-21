@@ -1,9 +1,7 @@
 name: CI/CD Workflow
 
 on:
-  push:
-    branches:
-      - dev
+  workflow_dispatch:
 
 jobs:
   create-or-update-pr:

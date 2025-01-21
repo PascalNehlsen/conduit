@@ -16,10 +16,6 @@ jobs:
           ref: 'dev'
           submodules: 'recursive'
           token: ${{ secrets.PAT }}
-          fetch-depth: 0
-
-      - name: Make changes to pull request
-        run: date +%s > report.txt
 
       - name: Create Pull Request
         id: cpr
@@ -30,9 +26,9 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: false
-          branch: dev
+          branch: create-pr
           base: main
-          delete-branch: false
+          delete-branch: true
           title: '[Example] Update report'
           body: |
             Update report
@@ -57,10 +53,10 @@ jobs:
           cd conduit-backend
           echo "Running backend tests..."
 
-      # - name: Enable Pull Request Automerge
-      #   if: steps.frontend-tests.outcome == 'success' && steps.backend-tests.outcome == 'success' && steps.cpr.outputs.pull-request-operation == 'created'
-      #   uses: peter-evans/enable-pull-request-automerge@v3
-      #   with:
-      #     token: ${{ secrets.PAT }}
-      #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-      #     merge-method: squash
+      - name: Enable Pull Request Automerge
+        if: steps.frontend-tests.outcome == 'success' && steps.backend-tests.outcome == 'success' && steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.PAT }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
