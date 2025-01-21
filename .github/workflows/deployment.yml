@@ -88,8 +88,8 @@ jobs:
       - name: Push images (with Docker Content Trust)
         run: |
           echo "Pushing frontend and backend images with Docker Content Trust enabled."
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ env.IMAGE_TAG }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
