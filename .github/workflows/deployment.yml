@@ -106,20 +106,17 @@ jobs:
 
       - name: SSH into the server and deploy with Docker Compose
         run: |
-          # Ensure necessary directory exists on the remote server
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 $REMOTE_USER@$REMOTE_HOST << 'EOF'
             mkdir -p $REMOTE_PATH
           EOF
 
-          # Copy only the docker-compose.yml to the remote server
           rsync -avz ./docker-compose.yml $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/
 
-          # SSH into the server and run Docker Compose
-          ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 $REMOTE_USER@$REMOTE_HOST << 'EOF'
             cd $REMOTE_PATH
-          echo "Starting the deployment..."
-          docker-compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
-          docker system prune -af || { echo "Failed to prune system"; exit 1; }
-          docker-compose pull || { echo "Failed to pull images"; exit 1; }
-          docker-compose up -d || { echo "Failed to start containers"; exit 1; }
+            echo "Starting the deployment..."
+            docker-compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
+            docker system prune -af || { echo "Failed to prune system"; exit 1; }
+            docker-compose pull || { echo "Failed to pull images"; exit 1; }
+            docker-compose up -d || { echo "Failed to start containers"; exit 1; }
           EOF
