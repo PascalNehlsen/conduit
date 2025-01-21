@@ -121,6 +121,9 @@ jobs:
           # Use rsync to transfer docker-compose.yml with sudo permissions
           rsync -avz --rsync-path="sudo rsync" ./docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
+          # Use rsync to transfer .env with sudo permissions
+          rsync -avz --rsync-path="sudo rsync" .env ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
+
           # Deploy the app with Docker Compose
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             cd ${{ secrets.TARGET }}
