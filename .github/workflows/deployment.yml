@@ -107,7 +107,7 @@ jobs:
       - name: SSH into the server and deploy with Docker Compose
         run: |
           # Ensure necessary directory exists on the remote server
-          ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 $REMOTE_USER@$REMOTE_HOST << 'EOF'
             mkdir -p $REMOTE_PATH
           EOF
 
