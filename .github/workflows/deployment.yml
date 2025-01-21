@@ -101,14 +101,21 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
+      - name: List repository files
+        run: |
+          ls -alh
+
       - name: SSH into the server and deploy with Docker Compose
         run: |
+          # Ensure the target directory exists on the remote server
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-            sudo mkdir -p ${{ secrets.TARGET }}
+            mkdir -p ${{ secrets.TARGET }}
           EOF
 
+          # Copy docker-compose.yaml to the remote server
           rsync -avz ./docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
+          # Run Docker Compose commands on the remote server
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             cd ${{ secrets.TARGET }}
             echo "Starting the deployment..."
