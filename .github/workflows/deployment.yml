@@ -125,8 +125,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             cd ${{ secrets.TARGET }}
             echo "Starting the deployment..."
-            docker-compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
+            docker compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
             docker system prune -af || { echo "Failed to prune system"; exit 1; }
-            docker-compose pull || { echo "Failed to pull images"; exit 1; }
-            docker-compose up -d || { echo "Failed to start containers"; exit 1; }
+            docker compose pull || { echo "Failed to pull images"; exit 1; }
+            docker compose up -d || { echo "Failed to start containers"; exit 1; }
           EOF
