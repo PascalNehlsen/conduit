@@ -1,8 +1,6 @@
 services:
   frontend:
-    build:
-      context: conduit-frontend
-      dockerfile: frontend.Dockerfile
+    image: ghcr.io/PascalNehlsen/conduit-frontend:${IMAGE_TAG}
     ports:
       - 8282:80
     restart: unless-stopped
@@ -10,13 +8,11 @@ services:
       - conduit-network
 
   backend:
-    build:
-      context: conduit-backend
-      dockerfile: backend.Dockerfile
+    image: ghcr.io/PascalNehlsen/conduit-backend:${IMAGE_TAG}
     env_file:
       - .env
     volumes:
-      - conduit:/app/db_data
+      - conduit-backend:/app/db_data
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -24,7 +20,7 @@ services:
       - conduit-network
 
 volumes:
-  conduit:
+  conduit-backend:
 
 networks:
   conduit-network:
