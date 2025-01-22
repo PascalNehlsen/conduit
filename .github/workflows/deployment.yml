@@ -18,8 +18,7 @@ on:
 
 env:
   REGISTRY: ghcr.io/pascalnehlsen
-  IMAGE_NAME_FRONTEND: conduit-frontend
-  IMAGE_NAME_BACKEND: conduit-backend
+  IMAGE_NAME: conduit
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_CONTENT_TRUST: 1
@@ -58,8 +57,7 @@ jobs:
         uses: docker/metadata-action@v5.6.1
         with:
           images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Create .env file from example.env and add GITHUB_SHA
         run: |
@@ -74,7 +72,7 @@ jobs:
           file: ./conduit-frontend/frontend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND}}/conduit-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
@@ -87,7 +85,7 @@ jobs:
           file: ./conduit-backend/backend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}/conduit-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
