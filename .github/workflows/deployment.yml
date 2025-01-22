@@ -113,12 +113,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download .env artifact
+      - name: Download deployment artifact
         uses: actions/download-artifact@v4.1.8
-        # with:
-        #   name: |
-        #     deployment-files/.env
-        #     deployment-files/docker-compose.yaml
+        with:
+          name: |
+            deployment-files
 
       - name: Display structure of downloaded files
         run: ls -R
