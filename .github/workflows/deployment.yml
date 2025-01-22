@@ -95,15 +95,26 @@ jobs:
       #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
       #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
 
+      - name: Upload artifacts (.env and docker-compose.yaml)
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: deployment-files
+          path: |
+            .env
+            docker-compose.yaml
+          include-hidden-files: true
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Download .env artifact
+        uses: actions/download-artifact@v4.1.8
         with:
-          submodules: recursive
+          name: |
+            .env
+            docker-compose.yaml
 
       - name: Set up SSH key
         run: |
@@ -119,11 +130,8 @@ jobs:
             sudo chown -R ${{ secrets.REMOTE_USER }}:$${{ secrets.REMOTE_USER }} ${{ secrets.TARGET }}  # Ensure user has write permission
           EOF
 
-          # Use rsync to transfer docker-compose.yml with sudo permissions
-          rsync -avz --rsync-path="sudo rsync" ./docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
+          rsync -avz --rsync-path="sudo rsync" .env docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
-          # Use rsync to transfer .env with sudo permissions
-          rsync -avz --rsync-path="sudo rsync" .env ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
 
           # Deploy the app with Docker Compose
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
