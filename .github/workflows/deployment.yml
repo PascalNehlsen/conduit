@@ -103,6 +103,7 @@ jobs:
             .env
             docker-compose.yaml
           include-hidden-files: true
+          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
@@ -113,8 +114,8 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: |
-            .env
-            docker-compose.yaml
+            /deployment-files/.env
+            /deployment-files/docker-compose.yaml
 
       - name: Set up SSH key
         run: |
