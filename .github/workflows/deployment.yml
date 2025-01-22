@@ -114,13 +114,6 @@ jobs:
           name: |
             deployment-files
 
-      - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
-
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -140,7 +133,12 @@ jobs:
 
           # Deploy the app with Docker Compose
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+
+            echo "Logging in to the registry..."
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p "${{ secrets.GHCR_PAT }}"
+
             cd ${{ secrets.TARGET }}
+            
             echo "Starting the deployment..."
             docker compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
             docker system prune -af || { echo "Failed to prune system"; exit 1; }
