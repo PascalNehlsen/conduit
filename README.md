@@ -70,7 +70,7 @@ Once the application is running, you can interact with the Conduit API via the *
 
 ### Pipeline
 
-For a Pipeline documentation visit [pipeline.md](.github\workflows\pipeline.md)
+For a Pipeline documentation visit [pipeline.md](.github/workflows/pipeline.md)
 
 ### Configuration
 
