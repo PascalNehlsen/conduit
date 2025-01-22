@@ -135,10 +135,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
 
             echo "Logging in to the registry..."
-            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p "${{ secrets.GHCR_PAT }}"
+            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             cd ${{ secrets.TARGET }}
-            
+
             echo "Starting the deployment..."
             docker compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
             docker system prune -af || { echo "Failed to prune system"; exit 1; }
