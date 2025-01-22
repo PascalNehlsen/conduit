@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/pascalnehlsen/conduit-frontend:${GITHUB_SHA}
+    image: ghcr.io/pascalnehlsen/conduit/conduit-frontend:${GITHUB_SHA}
     ports:
       - 8282:80
     restart: unless-stopped
@@ -10,7 +10,7 @@ services:
       - conduit-network
 
   backend:
-    image: ghcr.io/pascalnehlsen/conduit-backend:${GITHUB_SHA}
+    image: ghcr.io/pascalnehlsen/conduit/conduit-backend:${GITHUB_SHA}
     env_file:
       - .env
     volumes:
