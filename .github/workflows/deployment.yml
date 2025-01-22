@@ -1,4 +1,4 @@
-name: Clone repo & build & start app with Docker and Notary
+name: Clone repo & build & start app with Docker
 
 on:
   workflow_call:
@@ -18,7 +18,8 @@ on:
 
 env:
   REGISTRY: ghcr.io/pascalnehlsen
-  IMAGE_NAME: conduit
+  IMAGE_NAME_FRONTEND: conduit-frontend
+  IMAGE_NAME_BACKEND: conduit-backend
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_CONTENT_TRUST: 1
@@ -56,7 +57,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.6.1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
 
       - name: Create .env file from example.env and add GITHUB_SHA
         run: |
@@ -71,7 +74,7 @@ jobs:
           file: ./conduit-frontend/frontend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND}}/conduit-frontend:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
@@ -84,16 +87,10 @@ jobs:
           file: ./conduit-backend/backend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}/conduit-backend:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
-
-      # - name: Push images (with Docker Content Trust)
-      #   run: |
-      #     echo "Pushing frontend and backend images with Docker Content Trust enabled."
-      #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
-      #     docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
 
       - name: Upload artifacts (.env and docker-compose.yaml)
         uses: actions/upload-artifact@v4.6.0
