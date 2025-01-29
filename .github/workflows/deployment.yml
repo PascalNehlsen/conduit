@@ -116,6 +116,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: '.env,docker-compose.yaml'
           target: ${{ secrets.TARGET }}
+          overwrite: true
 
       - name: Run docker commands via ssh
         uses: appleboy/ssh-action@v1.2.0
@@ -124,7 +125,7 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            pwd
             docker compose down --remove-orphans
             docker system prune -af
-            docker compose pull
             docker compose up -d
