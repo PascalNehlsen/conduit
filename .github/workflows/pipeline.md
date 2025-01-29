@@ -27,7 +27,7 @@ The workflow is triggered under the following conditions:
 
 ## Workflow Overview
 
-The workflow consists of two main jobs:
+The workflow consists of two main jobs (using existing github actions):
 
 1. **Build Job**: This job builds and pushes Docker images for the frontend and backend of the application. The images are pushed to a Docker registry (GitHub Container Registry in this case).
 
@@ -35,64 +35,23 @@ The workflow consists of two main jobs:
 
 ## Steps in the Build Job:
 
-1. **Checkout Repository** (`actions/checkout`):
-
-   - The first step of the job is to clone the repository. This ensures that the latest version of the code is available.
-
-2. **Setup Docker Buildx** (`docker/setup-buildx-action`):
-
-   - This action sets up Docker Buildx, which is necessary for advanced build features like multi-architecture builds.
-
-3. **Docker Login**:
-   - The `docker/login-action` is used to authenticate with the GitHub Container Registry (GHCR) in order to push Docker images.
-   - The GitHub Personal Access Token (`GHCR_PAT`) is used for authentication.
-4. **Extract Docker Metadata**:
-
-   - The `docker/metadata-action` is used to extract metadata from the Dockerfiles for both frontend and backend images. This step generates labels for the Docker images.
-
-5. **Create .env File**:
-
-   - The `.env` file is copied from example.env, and the GitHub commit SHA (GITHUB_SHA) is added to it. This allows for tracking which commit the build corresponds to.
-
-6. **Build and Push Docker Images for Frontend and Backend**:
-
-   - The frontend and backend images are built and pushed using the `docker/build-push-action`.
-   - The images are tagged with the GitHub commit SHA (`${{ github.sha }}`) and pushed to the GitHub Container Registry (`ghcr.io`).
-
-7. **Upload Artifacts**:
-   - The `.env` and `docker-compose.yaml` files are uploaded as artifacts. These files will be used in the deployment step to configure the application on the remote server.
+- Clone repository using [actions/checkout](https://github.com/actions/checkout/tree/v4/) to get the latest code
+- Set up Docker Buildx with [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action/tree/v3.8.0/) for advanced build features
+- Authenticate with GHCR using [docker/login-action](https://github.com/docker/login-action/tree/v3.3.0/)
+- Extract metadata with [docker/metadata-action](https://github.com/docker/metadata-action/tree/v5.6.1/) to extract metadata
+- Create .env file from [example.env](../../example.env)
+- Build and push frontend & backend images with [docker/build-push-action](https://github.com/docker/build-push-action/tree/v6.12.0/)
+- Upload deployment artifacts with [actions/download-artifact](https://github.com/actions/upload-artifact/tree/v4.6.0/) (`.env` and `docker-compose.yaml`)
 
 ## Steps in the Deploy Job:
 
-1. **Checkout Repository** `(actions/checkout)`:
-
-   - The repository is checked out again in the deploy job to ensure that the latest version of the code and the necessary files are available.
-
-2. **Download Deployment Artifacts** (`actions/download-artifact`):
-
-   - The artifacts uploaded in the build job (`.env` and `docker-compose.yaml`) are downloaded to the deploy job. These files are needed to configure the application on the remote server.
-
-3. **Setup SSH Key**:
-
-   - The private SSH key (`SSH_PRIVATE_KEY`) is set up for authenticating with the remote server. This allows secure SSH access to the remote host.
-
-4. **SSH into the Remote Server and Prepare Directory**:
-
-   - An SSH connection is established to the remote server to ensure that the target directory exists and has the correct permissions. The directory is created if it doesn't exist, and the ownership is set correctly.
-
-5. **Use rsync to Transfer Files**:
-
-   - The `.env` and `docker-compose.yaml` files are transferred to the target directory on the remote server using rsync. The `--rsync-path="sudo rsync"` option ensures that the files are transferred with elevated privileges if needed.
-
-6. **Deploy the Application with Docker Compose**:
-   - After the files are transferred, an SSH command is executed to:
-     - Log into the Docker registry using the GitHub token (`GHCR_PAT`).
-     - Navigate to the target directory.
-     - Run the following Docker Compose commands:
-       `docker compose down --remove-orphans:` Stops and removes any orphaned containers.
-       `docker system prune -af:` Cleans up unused Docker images, containers, and volumes.
-       `docker compose pull:` Pulls the latest Docker images from the registry.
-       `docker compose up -d:` Starts the containers in detached mode.
+- Clone repository using [actions/checkout](https://github.com/actions/checkout/tree/v4/) to get the latest code
+- Download deployment artifacts with [actions/download-artifact](https://github.com/actions/download-artifact/tree/v4.1.8/)
+- Transfer files via SCP using [appleboy/scp-action](https://github.com/appleboy/scp-action/tree/v0.1.7/) to copy `.env` and `docker-compose.yaml` to the remote server
+- Deploy with SSH using [appleboy/ssh-action](https://github.com/appleboy/ssh-action/tree/v1.2.0/):
+  - Stop old containers: `docker compose down --remove-orphans`
+  - Clean up unused resources: `docker system prune -af`
+  - Start containers: `docker compose up -d`
 
 ## Secrets Required for Deployment:
 

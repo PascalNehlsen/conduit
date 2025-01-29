@@ -15,13 +15,14 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 env:
-  REGISTRY: ghcr.io/pascalnehlsen
-  IMAGE_NAME: conduit
+  REGISTRY: ghcr.io
+  IMAGE_NAME: pascalnehlsen/conduit
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
-  DOCKER_CONTENT_TRUST: 1
 
 jobs:
   build:
@@ -68,6 +69,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
@@ -81,6 +84,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
@@ -109,34 +114,24 @@ jobs:
           name: |
             deployment-files
 
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+      - name: Copy artifact files via scp
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: '.env,docker-compose.yaml'
+          target: ${{ secrets.TARGET }}
+          overwrite: true
 
-      - name: SSH into the server and deploy with Docker Compose
-        run: |
-          # Ensure the target directory exists on the remote server with correct permissions
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-            sudo mkdir -p ${{ secrets.TARGET }}
-            sudo chown -R ${{ secrets.REMOTE_USER }}:$${{ secrets.REMOTE_USER }} ${{ secrets.TARGET }}  # Ensure user has write permission
-          EOF
-                  
-          # Use rsync to transfer .env and docker-compose.yaml with sudo permissions
-          rsync -avz --rsync-path="sudo rsync" .env docker-compose.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.TARGET }}/
-
-          # Deploy the app with Docker Compose
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-
-            echo "Logging in to the registry..."
-            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
+      - name: Run docker commands via ssh
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd ${{ secrets.TARGET }}
-
-            echo "Starting the deployment..."
-            docker compose down --remove-orphans || { echo "Failed to stop containers"; exit 1; }
-            docker system prune -af || { echo "Failed to prune system"; exit 1; }
-            docker compose pull || { echo "Failed to pull images"; exit 1; }
-            docker compose up -d || { echo "Failed to start containers"; exit 1; }
-          EOF
+            docker compose down --remove-orphans
+            docker system prune -af
+            docker compose up -d
