@@ -21,7 +21,6 @@ env:
   IMAGE_NAME: pascalnehlsen/conduit
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
-  DOCKER_CONTENT_TRUST: 1
 
 jobs:
   build:
