@@ -15,6 +15,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
@@ -66,7 +68,8 @@ jobs:
           file: ./conduit-frontend/frontend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
@@ -79,7 +82,8 @@ jobs:
           file: ./conduit-backend/backend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=common
           cache-to: type=gha,mode=max,scope=common
