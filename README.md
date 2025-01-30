@@ -6,6 +6,7 @@
 2. [Quickstart](#quickstart)
 3. [Usage](#usage)
    - [Configuration](#configuration)
+   - [Pipeline](#pipeline)
 4. [Contact](#contact)
 
 ## Description
@@ -68,6 +69,8 @@ Ensure you have the following tools installed:
 Once the application is running, you can interact with the Conduit API via the **Backend** at `http://localhost:8000`. The **Frontend** will communicate with the API to fetch and display data.
 
 ### Pipeline
+
+For a Pipeline documentation visit [pipeline.md](.github/workflows/pipeline.md)
 
 ### Configuration
 
