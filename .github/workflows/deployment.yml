@@ -68,6 +68,7 @@ jobs:
           file: ./conduit-frontend/frontend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:${{ github.ref_name }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
@@ -82,6 +83,7 @@ jobs:
           file: ./conduit-backend/backend.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:${{ github.ref_name }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/conduit-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
